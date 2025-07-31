@@ -14,16 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      patients: {
+        Row: {
+          admitted_by: string
+          age: number
+          created_at: string
+          full_name: string
+          id: string
+          national_id: string
+          patient_id: string
+          smartwatch_id: string
+          updated_at: string
+        }
+        Insert: {
+          admitted_by: string
+          age: number
+          created_at?: string
+          full_name: string
+          id?: string
+          national_id: string
+          patient_id: string
+          smartwatch_id: string
+          updated_at?: string
+        }
+        Update: {
+          admitted_by?: string
+          age?: number
+          created_at?: string
+          full_name?: string
+          id?: string
+          national_id?: string
+          patient_id?: string
+          smartwatch_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_admitted_by_fkey"
+            columns: ["admitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sensor_data: {
+        Row: {
+          bpm: number | null
+          diastolic_bp: number | null
+          id: string
+          patient_id: string
+          so2: number | null
+          systolic_bp: number | null
+          timestamp: string
+        }
+        Insert: {
+          bpm?: number | null
+          diastolic_bp?: number | null
+          id?: string
+          patient_id: string
+          so2?: number | null
+          systolic_bp?: number | null
+          timestamp?: string
+        }
+        Update: {
+          bpm?: number | null
+          diastolic_bp?: number | null
+          id?: string
+          patient_id?: string
+          so2?: number | null
+          systolic_bp?: number | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sensor_data_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      watchlist: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watchlist_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_patient_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_smartwatch_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "doctor" | "nurse"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +308,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["doctor", "nurse"],
+    },
   },
 } as const
