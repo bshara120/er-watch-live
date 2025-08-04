@@ -13,7 +13,7 @@ interface AddPatientDialogProps {
 }
 
 const AddPatientDialog = ({ onPatientAdded }: AddPatientDialogProps) => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [fullName, setFullName] = useState('');
   const [nationalId, setNationalId] = useState('');
@@ -22,7 +22,7 @@ const AddPatientDialog = ({ onPatientAdded }: AddPatientDialogProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!profile) return;
 
     setIsSubmitting(true);
     try {
@@ -38,7 +38,7 @@ const AddPatientDialog = ({ onPatientAdded }: AddPatientDialogProps) => {
           national_id: nationalId,
           age: parseInt(age),
           smartwatch_id: smartwatchIdData,
-          admitted_by: user.id,
+          admitted_by: profile.id,
         });
 
       if (error) throw error;
