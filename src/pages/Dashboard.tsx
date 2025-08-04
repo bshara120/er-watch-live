@@ -47,6 +47,19 @@ const Dashboard = () => {
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [patientsLoading, setPatientsLoading] = useState(true);
 
+  // All hooks must be called before any early returns
+  useEffect(() => {
+    if (user && profile) {
+      fetchPatients();
+      fetchWatchlist();
+      setupRealtimeSubscription();
+    }
+  }, [user, profile]);
+
+  useEffect(() => {
+    filterPatients();
+  }, [patients, searchTerm, showWatchlistOnly, watchlist]);
+
   // Redirect if not authenticated
   if (!user && !loading) {
     return <Navigate to="/auth" replace />;
@@ -62,16 +75,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    fetchPatients();
-    fetchWatchlist();
-    setupRealtimeSubscription();
-  }, []);
-
-  useEffect(() => {
-    filterPatients();
-  }, [patients, searchTerm, showWatchlistOnly, watchlist]);
 
   const fetchPatients = async () => {
     try {
