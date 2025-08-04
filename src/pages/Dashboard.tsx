@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -47,36 +47,25 @@ const Dashboard = () => {
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [patientsLoading, setPatientsLoading] = useState(true);
 
-  // All hooks must be called before any early returns
-  useEffect(() => {
-    if (user && profile) {
-      fetchPatients();
-      fetchWatchlist();
-      setupRealtimeSubscription();
+  // Define functions with useCallback to prevent dependency issues
+  const filterPatients = useCallback(() => {
+    let filtered = patients;
+
+    if (searchTerm) {
+      filtered = filtered.filter(patient =>
+        patient.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.patient_id.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  }, [user, profile]);
 
-  useEffect(() => {
-    filterPatients();
-  }, [patients, searchTerm, showWatchlistOnly, watchlist]);
+    if (showWatchlistOnly && profile?.role === 'doctor') {
+      filtered = filtered.filter(patient => watchlist.includes(patient.id));
+    }
 
-  // Redirect if not authenticated
-  if (!user && !loading) {
-    return <Navigate to="/auth" replace />;
-  }
+    setFilteredPatients(filtered);
+  }, [patients, searchTerm, showWatchlistOnly, watchlist, profile?.role]);
 
-  if (loading || !profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-medical-primary/10 to-medical-info/10">
-        <div className="animate-pulse flex items-center gap-2">
-          <Activity className="h-8 w-8 text-medical-primary" />
-          <span className="text-lg font-semibold">Loading Dashboard...</span>
-        </div>
-      </div>
-    );
-  }
-
-  const fetchPatients = async () => {
+  const fetchPatients = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('patients')
@@ -119,9 +108,9 @@ const Dashboard = () => {
     } finally {
       setPatientsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchWatchlist = async () => {
+  const fetchWatchlist = useCallback(async () => {
     if (profile?.role !== 'doctor') return;
 
     try {
@@ -136,9 +125,9 @@ const Dashboard = () => {
     } catch (error: any) {
       console.error('Error fetching watchlist:', error);
     }
-  };
+  }, [profile?.role, profile?.id]);
 
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscription = useCallback(() => {
     const channel = supabase
       .channel('sensor-data-changes')
       .on(
@@ -161,24 +150,36 @@ const Dashboard = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, []);
 
-  const filterPatients = () => {
-    let filtered = patients;
-
-    if (searchTerm) {
-      filtered = filtered.filter(patient =>
-        patient.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.patient_id.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  // All hooks must be called before any early returns
+  useEffect(() => {
+    if (user && profile) {
+      fetchPatients();
+      fetchWatchlist();
+      setupRealtimeSubscription();
     }
+  }, [user, profile, fetchPatients, fetchWatchlist, setupRealtimeSubscription]);
 
-    if (showWatchlistOnly && profile?.role === 'doctor') {
-      filtered = filtered.filter(patient => watchlist.includes(patient.id));
-    }
+  useEffect(() => {
+    filterPatients();
+  }, [filterPatients]);
 
-    setFilteredPatients(filtered);
-  };
+  // Redirect if not authenticated
+  if (!user && !loading) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (loading || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-medical-primary/10 to-medical-info/10">
+        <div className="animate-pulse flex items-center gap-2">
+          <Activity className="h-8 w-8 text-medical-primary" />
+          <span className="text-lg font-semibold">Loading Dashboard...</span>
+        </div>
+      </div>
+    );
+  }
 
   const toggleSimulation = async () => {
     try {
