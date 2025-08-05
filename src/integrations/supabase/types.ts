@@ -90,28 +90,34 @@ export type Database = {
       }
       sensor_data: {
         Row: {
+          body_temp: number | null
           bpm: number | null
           diastolic_bp: number | null
           id: string
           patient_id: string
+          respiratory_rate: number | null
           so2: number | null
           systolic_bp: number | null
           timestamp: string
         }
         Insert: {
+          body_temp?: number | null
           bpm?: number | null
           diastolic_bp?: number | null
           id?: string
           patient_id: string
+          respiratory_rate?: number | null
           so2?: number | null
           systolic_bp?: number | null
           timestamp?: string
         }
         Update: {
+          body_temp?: number | null
           bpm?: number | null
           diastolic_bp?: number | null
           id?: string
           patient_id?: string
+          respiratory_rate?: number | null
           so2?: number | null
           systolic_bp?: number | null
           timestamp?: string

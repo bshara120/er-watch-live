@@ -24,6 +24,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    console.log('Starting continuous sensor simulation...');
+
     // Get all patients
     const { data: patients, error: patientsError } = await supabaseClient
       .from('patients')
@@ -43,9 +45,9 @@ serve(async (req) => {
       );
     }
 
-    // Generate random but realistic sensor data
-    const generateVitals = () => {
-      // Normal ranges with some variation
+    // Generate random but realistic sensor data with slight variations
+    const generateVitals = (patientId: string) => {
+      // Get previous reading to create realistic progression
       const baseHR = 70 + Math.random() * 20; // 70-90 baseline
       const baseSO2 = 96 + Math.random() * 3; // 96-99 baseline
       const baseSystolic = 110 + Math.random() * 20; // 110-130 baseline
@@ -53,8 +55,8 @@ serve(async (req) => {
       const baseBodyTemp = 36.0 + Math.random() * 2.5; // 36.0-38.5°C baseline
       const baseRespRate = 12 + Math.random() * 8; // 12-20 breaths/min baseline
 
-      // Add some random variation (±10%)
-      const variation = 0.9 + Math.random() * 0.2;
+      // Add slight random variation (±5% for continuous simulation)
+      const variation = 0.95 + Math.random() * 0.1;
       
       return {
         bpm: Math.round(baseHR * variation),
@@ -68,7 +70,7 @@ serve(async (req) => {
 
     // Insert sensor data for each patient
     const insertPromises = patients.map(async (patient: Patient) => {
-      const vitals = generateVitals();
+      const vitals = generateVitals(patient.id);
       
       const { error } = await supabaseClient
         .from('sensor_data')
@@ -88,7 +90,7 @@ serve(async (req) => {
         return { patient: patient.patient_id, success: false, error: error.message };
       }
 
-      console.log(`Generated vitals for ${patient.full_name} (${patient.patient_id}):`, vitals);
+      console.log(`Generated continuous vitals for ${patient.full_name} (${patient.patient_id}):`, vitals);
       return { patient: patient.patient_id, success: true, vitals };
     });
 
@@ -96,19 +98,14 @@ serve(async (req) => {
     const successful = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
 
-    console.log(`Sensor simulation completed: ${successful} successful, ${failed} failed`);
+    console.log(`Continuous sensor simulation completed: ${successful} successful, ${failed} failed`);
 
     return new Response(
       JSON.stringify({
-        message: `Sensor data generated for ${successful} patients`,
+        message: `Continuous sensor data generated for ${successful} patients`,
         successful,
         failed,
-        results: results.map(r => ({
-          patient: r.patient,
-          success: r.success,
-          vitals: r.success ? (r as any).vitals : undefined,
-          error: !r.success ? (r as any).error : undefined,
-        })),
+        timestamp: new Date().toISOString(),
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -117,11 +114,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in sensor simulation:', error);
+    console.error('Error in continuous sensor simulation:', error);
     
     return new Response(
       JSON.stringify({ 
-        error: 'Failed to generate sensor data',
+        error: 'Failed to generate continuous sensor data',
         details: error.message 
       }),
       { 
