@@ -7,6 +7,8 @@ interface SensorData {
   so2: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
+  body_temp: number | null;
+  respiratory_rate: number | null;
   timestamp: string;
 }
 
@@ -22,6 +24,8 @@ const VitalsChart = ({ data, height = 300 }: VitalsChartProps) => {
     so2: item.so2,
     systolic: item.systolic_bp,
     diastolic: item.diastolic_bp,
+    bodyTemp: item.body_temp,
+    respRate: item.respiratory_rate,
   }));
 
   return (
@@ -76,6 +80,22 @@ const VitalsChart = ({ data, height = 300 }: VitalsChartProps) => {
             stroke="hsl(var(--medical-success))" 
             strokeWidth={2}
             name="Diastolic BP"
+            connectNulls={false}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="bodyTemp" 
+            stroke="hsl(var(--medical-primary))" 
+            strokeWidth={2}
+            name="Body Temperature (°C)"
+            connectNulls={false}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="respRate" 
+            stroke="#9333EA" 
+            strokeWidth={2}
+            name="Respiratory Rate (bpm)"
             connectNulls={false}
           />
         </LineChart>

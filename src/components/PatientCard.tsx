@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Droplets, Activity, Clock, Star, StarOff } from 'lucide-react';
+import { Heart, Droplets, Activity, Clock, Star, StarOff, Thermometer, Wind } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -24,6 +24,8 @@ interface SensorData {
   so2: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
+  body_temp: number | null;
+  respiratory_rate: number | null;
   timestamp: string;
 }
 
@@ -48,6 +50,8 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
   const bpmStatus = getVitalStatus(latestVitals?.bpm || null, [60, 100]);
   const so2Status = getVitalStatus(latestVitals?.so2 || null, [95, 100]);
   const bpStatus = getVitalStatus(latestVitals?.systolic_bp || null, [90, 140]);
+  const tempStatus = getVitalStatus(latestVitals?.body_temp || null, [36.0, 38.0]);
+  const respStatus = getVitalStatus(latestVitals?.respiratory_rate || null, [12, 20]);
 
   const handleWatchlistToggle = async () => {
     if (!profile || profile.role !== 'doctor') return;
@@ -146,7 +150,7 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center gap-2">
             <Heart className={`h-4 w-4 text-${getStatusColor(bpmStatus)}`} />
             <div>
@@ -182,6 +186,30 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
               </div>
               <Badge variant={getStatusBadgeVariant(bpStatus)} className="text-xs">
                 Blood Pressure
+              </Badge>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Thermometer className={`h-4 w-4 text-${getStatusColor(tempStatus)}`} />
+            <div>
+              <div className="text-sm font-medium">
+                {latestVitals?.body_temp || 'N/A'}°C
+              </div>
+              <Badge variant={getStatusBadgeVariant(tempStatus)} className="text-xs">
+                Body Temp
+              </Badge>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Wind className={`h-4 w-4 text-${getStatusColor(respStatus)}`} />
+            <div>
+              <div className="text-sm font-medium">
+                {latestVitals?.respiratory_rate || 'N/A'} bpm
+              </div>
+              <Badge variant={getStatusBadgeVariant(respStatus)} className="text-xs">
+                Respiratory
               </Badge>
             </div>
           </div>

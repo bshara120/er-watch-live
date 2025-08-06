@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, Droplets, Activity, User, Clock, Smartphone } from 'lucide-react';
+import { Heart, Droplets, Activity, User, Clock, Smartphone, Thermometer, Wind } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import VitalsChart from './VitalsChart';
 
@@ -24,6 +24,8 @@ interface SensorData {
   so2: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
+  body_temp: number | null;
+  respiratory_rate: number | null;
   timestamp: string;
 }
 
@@ -170,6 +172,22 @@ const PatientDetailsDialog = ({ patient, open, onOpenChange }: PatientDetailsDia
                             : 'N/A'
                           }
                         </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Thermometer className={`h-4 w-4 text-${getVitalStatus(latestVitals.body_temp, [36.0, 38.0])}`} />
+                          <span className="text-sm">Body Temperature</span>
+                        </div>
+                        <span className="text-sm font-medium">{latestVitals.body_temp || 'N/A'}°C</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Wind className={`h-4 w-4 text-${getVitalStatus(latestVitals.respiratory_rate, [12, 20])}`} />
+                          <span className="text-sm">Respiratory Rate</span>
+                        </div>
+                        <span className="text-sm font-medium">{latestVitals.respiratory_rate || 'N/A'} bpm</span>
                       </div>
                       
                       <div className="flex items-center gap-1 text-xs text-muted-foreground pt-2">

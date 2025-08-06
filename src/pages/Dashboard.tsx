@@ -32,6 +32,8 @@ interface SensorData {
   so2: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
+  body_temp: number | null;
+  respiratory_rate: number | null;
   timestamp: string;
 }
 
