@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string | null
+          device_id: string | null
+          id: string
+          is_acknowledged: boolean | null
+          message: string
+          patient_id: string
+          severity: string
+          threshold: number
+          value: number
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string | null
+          device_id?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          message: string
+          patient_id: string
+          severity: string
+          threshold: number
+          value: number
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string | null
+          device_id?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          message?: string
+          patient_id?: string
+          severity?: string
+          threshold?: number
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "alerts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devices: {
+        Row: {
+          api_key: string
+          created_at: string | null
+          device_id: string
+          device_model: string | null
+          id: string
+          is_active: boolean | null
+          last_sync: string | null
+          patient_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_key: string
+          created_at?: string | null
+          device_id: string
+          device_model?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_key?: string
+          created_at?: string | null
+          device_id?: string
+          device_model?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          patient_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devices_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           age: number

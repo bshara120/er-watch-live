@@ -3,11 +3,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 interface SensorData {
   id: string;
   patient_id: string;
-  bpm: number | null;
-  so2: number | null;
+  heart_rate: number | null;
+  oxygen_saturation: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
-  body_temp: number | null;
+  body_temperature: number | null;
   respiratory_rate: number | null;
   timestamp: string;
 }
@@ -20,11 +20,11 @@ interface VitalsChartProps {
 const VitalsChart = ({ data, height = 300 }: VitalsChartProps) => {
   const chartData = data.map(item => ({
     time: new Date(item.timestamp).toLocaleTimeString(),
-    bpm: item.bpm,
-    so2: item.so2,
+    heartRate: item.heart_rate,
+    oxygenSat: item.oxygen_saturation,
     systolic: item.systolic_bp,
     diastolic: item.diastolic_bp,
-    bodyTemp: item.body_temp,
+    bodyTemp: item.body_temperature,
     respRate: item.respiratory_rate,
   }));
 
@@ -52,7 +52,7 @@ const VitalsChart = ({ data, height = 300 }: VitalsChartProps) => {
           <Legend />
           <Line 
             type="monotone" 
-            dataKey="bpm" 
+            dataKey="heartRate" 
             stroke="hsl(var(--medical-danger))" 
             strokeWidth={2}
             name="Heart Rate (BPM)"
@@ -60,7 +60,7 @@ const VitalsChart = ({ data, height = 300 }: VitalsChartProps) => {
           />
           <Line 
             type="monotone" 
-            dataKey="so2" 
+            dataKey="oxygenSat" 
             stroke="hsl(var(--medical-info))" 
             strokeWidth={2}
             name="Oxygen Saturation (%)"

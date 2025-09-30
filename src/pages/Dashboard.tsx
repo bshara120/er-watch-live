@@ -8,12 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { LogOut, Search, Users, Activity, Heart, Stethoscope, Star, Play, Pause } from 'lucide-react';
+import { LogOut, Search, Users, Activity, Heart, Stethoscope, Star, Play, Pause, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import PatientCard from '@/components/PatientCard';
 import AddPatientDialog from '@/components/AddPatientDialog';
 import PatientDetailsDialog from '@/components/PatientDetailsDialog';
+import AlertsPanel from '@/components/AlertsPanel';
+import DeviceManagement from '@/components/DeviceManagement';
+import { Link } from 'react-router-dom';
 
 interface Patient {
   id: string;
@@ -28,11 +31,11 @@ interface Patient {
 interface SensorData {
   id: string;
   patient_id: string;
-  bpm: number | null;
-  so2: number | null;
+  heart_rate: number | null;
+  oxygen_saturation: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
-  body_temp: number | null;
+  body_temperature: number | null;
   respiratory_rate: number | null;
   timestamp: string;
 }
@@ -246,6 +249,12 @@ const Dashboard = () => {
               >
                 <LogOut className="h-4 w-4" />
               </Button>
+              <Link to="/galaxy-watch-setup">
+                <Button variant="outline" size="sm">
+                  <Info className="h-4 w-4 mr-2" />
+                  Setup Guide
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -253,134 +262,145 @@ const Dashboard = () => {
 
       {/* Controls */}
       <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search patients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full sm:w-64"
-              />
-            </div>
-            
-            {profile.role === 'doctor' && (
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="watchlist-only"
-                  checked={showWatchlistOnly}
-                  onCheckedChange={setShowWatchlistOnly}
-                />
-                <Label htmlFor="watchlist-only" className="flex items-center gap-1">
-                  <Star className="h-4 w-4" />
-                  Watchlist Only
-                </Label>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+          {/* Left column - Controls and Stats */}
+          <div className="xl:col-span-2 space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search patients..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full sm:w-64"
+                  />
+                </div>
+                
+                {profile.role === 'doctor' && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="watchlist-only"
+                      checked={showWatchlistOnly}
+                      onCheckedChange={setShowWatchlistOnly}
+                    />
+                    <Label htmlFor="watchlist-only" className="flex items-center gap-1">
+                      <Star className="h-4 w-4" />
+                      Watchlist Only
+                    </Label>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              variant={isSimulationRunning ? "destructive" : "default"}
-              onClick={toggleSimulation}
-              className="flex items-center gap-2"
-            >
-              {isSimulationRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              {isSimulationRunning ? 'Stop' : 'Start'} Simulation
-            </Button>
-            <AddPatientDialog onPatientAdded={fetchPatients} />
-          </div>
-        </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant={isSimulationRunning ? "destructive" : "default"}
+                  onClick={toggleSimulation}
+                  className="flex items-center gap-2"
+                >
+                  {isSimulationRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  {isSimulationRunning ? 'Stop' : 'Start'} Simulation
+                </Button>
+                <AddPatientDialog onPatientAdded={fetchPatients} />
+              </div>
+            </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{patients.length}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Monitors</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{Object.keys(latestVitals).length}</div>
-            </CardContent>
-          </Card>
-          
-          {profile.role === 'doctor' && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Watchlist</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{watchlist.length}</div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Patients Grid */}
-        {patientsLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded"></div>
+                  <div className="text-2xl font-bold">{patients.length}</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Monitors</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{Object.keys(latestVitals).length}</div>
+                </CardContent>
+              </Card>
+              
+              {profile.role === 'doctor' && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Watchlist</CardTitle>
+                    <Star className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{watchlist.length}</div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Patients Grid */}
+            {patientsLoading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-muted rounded"></div>
+                        <div className="h-3 bg-muted rounded"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredPatients.length === 0 ? (
+              <Card>
+                <CardContent className="flex items-center justify-center h-64">
+                  <div className="text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium mb-2">No patients found</p>
+                    <p className="text-sm">
+                      {searchTerm
+                        ? 'Try adjusting your search terms'
+                        : showWatchlistOnly
+                        ? 'No patients in your watchlist'
+                        : 'Add a patient to get started'
+                      }
+                    </p>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : filteredPatients.length === 0 ? (
-          <Card>
-            <CardContent className="flex items-center justify-center h-64">
-              <div className="text-center text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">No patients found</p>
-                <p className="text-sm">
-                  {searchTerm
-                    ? 'Try adjusting your search terms'
-                    : showWatchlistOnly
-                    ? 'No patients in your watchlist'
-                    : 'Add a patient to get started'
-                  }
-                </p>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {filteredPatients.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="cursor-pointer"
+                    onClick={() => setSelectedPatient(patient)}
+                  >
+                    <PatientCard
+                      patient={patient}
+                      latestVitals={latestVitals[patient.id] || null}
+                      isWatchlisted={watchlist.includes(patient.id)}
+                      onWatchlistChange={fetchWatchlist}
+                    />
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredPatients.map((patient) => (
-              <div
-                key={patient.id}
-                className="cursor-pointer"
-                onClick={() => setSelectedPatient(patient)}
-              >
-                <PatientCard
-                  patient={patient}
-                  latestVitals={latestVitals[patient.id] || null}
-                  isWatchlisted={watchlist.includes(patient.id)}
-                  onWatchlistChange={fetchWatchlist}
-                />
-              </div>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* Right column - Alerts and Device Management */}
+          <div className="xl:col-span-1 space-y-6">
+            <AlertsPanel />
+            <DeviceManagement />
+          </div>
+        </div>
       </div>
 
       {/* Patient Details Dialog */}

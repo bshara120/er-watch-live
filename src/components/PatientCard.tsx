@@ -20,11 +20,11 @@ interface Patient {
 interface SensorData {
   id: string;
   patient_id: string;
-  bpm: number | null;
-  so2: number | null;
+  heart_rate: number | null;
+  oxygen_saturation: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
-  body_temp: number | null;
+  body_temperature: number | null;
   respiratory_rate: number | null;
   timestamp: string;
 }
@@ -47,10 +47,10 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
     return 'success';
   };
 
-  const bpmStatus = getVitalStatus(latestVitals?.bpm || null, [60, 100]);
-  const so2Status = getVitalStatus(latestVitals?.so2 || null, [95, 100]);
+  const bpmStatus = getVitalStatus(latestVitals?.heart_rate || null, [60, 100]);
+  const so2Status = getVitalStatus(latestVitals?.oxygen_saturation || null, [95, 100]);
   const bpStatus = getVitalStatus(latestVitals?.systolic_bp || null, [90, 140]);
-  const tempStatus = getVitalStatus(latestVitals?.body_temp || null, [36.0, 38.0]);
+  const tempStatus = getVitalStatus(latestVitals?.body_temperature || null, [36.0, 38.0]);
   const respStatus = getVitalStatus(latestVitals?.respiratory_rate || null, [12, 20]);
 
   const handleWatchlistToggle = async () => {
@@ -155,7 +155,7 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
             <Heart className={`h-4 w-4 text-${getStatusColor(bpmStatus)}`} />
             <div>
               <div className="text-sm font-medium">
-                {latestVitals?.bpm || 'N/A'} BPM
+                {latestVitals?.heart_rate || 'N/A'} BPM
               </div>
               <Badge variant={getStatusBadgeVariant(bpmStatus)} className="text-xs">
                 Heart Rate
@@ -167,7 +167,7 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
             <Droplets className={`h-4 w-4 text-${getStatusColor(so2Status)}`} />
             <div>
               <div className="text-sm font-medium">
-                {latestVitals?.so2 || 'N/A'}%
+                {latestVitals?.oxygen_saturation || 'N/A'}%
               </div>
               <Badge variant={getStatusBadgeVariant(so2Status)} className="text-xs">
                 Oxygen
@@ -194,7 +194,7 @@ const PatientCard = ({ patient, latestVitals, isWatchlisted = false, onWatchlist
             <Thermometer className={`h-4 w-4 text-${getStatusColor(tempStatus)}`} />
             <div>
               <div className="text-sm font-medium">
-                {latestVitals?.body_temp || 'N/A'}°C
+                {latestVitals?.body_temperature || 'N/A'}°C
               </div>
               <Badge variant={getStatusBadgeVariant(tempStatus)} className="text-xs">
                 Body Temp

@@ -20,11 +20,11 @@ interface Patient {
 interface SensorData {
   id: string;
   patient_id: string;
-  bpm: number | null;
-  so2: number | null;
+  heart_rate: number | null;
+  oxygen_saturation: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
-  body_temp: number | null;
+  body_temperature: number | null;
   respiratory_rate: number | null;
   timestamp: string;
 }
@@ -147,18 +147,18 @@ const PatientDetailsDialog = ({ patient, open, onOpenChange }: PatientDetailsDia
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Heart className={`h-4 w-4 text-${getVitalStatus(latestVitals.bpm, [60, 100])}`} />
+                          <Heart className={`h-4 w-4 text-${getVitalStatus(latestVitals.heart_rate, [60, 100])}`} />
                           <span className="text-sm">Heart Rate</span>
                         </div>
-                        <span className="text-sm font-medium">{latestVitals.bpm || 'N/A'} BPM</span>
+                        <span className="text-sm font-medium">{latestVitals.heart_rate || 'N/A'} BPM</span>
                       </div>
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Droplets className={`h-4 w-4 text-${getVitalStatus(latestVitals.so2, [95, 100])}`} />
+                          <Droplets className={`h-4 w-4 text-${getVitalStatus(latestVitals.oxygen_saturation, [95, 100])}`} />
                           <span className="text-sm">Oxygen</span>
                         </div>
-                        <span className="text-sm font-medium">{latestVitals.so2 || 'N/A'}%</span>
+                        <span className="text-sm font-medium">{latestVitals.oxygen_saturation || 'N/A'}%</span>
                       </div>
                       
                       <div className="flex items-center justify-between">
@@ -176,10 +176,10 @@ const PatientDetailsDialog = ({ patient, open, onOpenChange }: PatientDetailsDia
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Thermometer className={`h-4 w-4 text-${getVitalStatus(latestVitals.body_temp, [36.0, 38.0])}`} />
+                          <Thermometer className={`h-4 w-4 text-${getVitalStatus(latestVitals.body_temperature, [36.0, 38.0])}`} />
                           <span className="text-sm">Body Temperature</span>
                         </div>
-                        <span className="text-sm font-medium">{latestVitals.body_temp || 'N/A'}°C</span>
+                        <span className="text-sm font-medium">{latestVitals.body_temperature || 'N/A'}°C</span>
                       </div>
                       
                       <div className="flex items-center justify-between">

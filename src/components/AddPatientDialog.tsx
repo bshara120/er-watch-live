@@ -26,26 +26,27 @@ const AddPatientDialog = ({ onPatientAdded }: AddPatientDialogProps) => {
 
     setIsSubmitting(true);
     try {
-      // Get the next patient ID and smartwatch ID
-      const { data: patientIdData } = await supabase.rpc('generate_patient_id');
-      const { data: smartwatchIdData } = await supabase.rpc('generate_smartwatch_id');
+      // Generate patient ID and smartwatch ID
+      const timestamp = Date.now().toString().slice(-8);
+      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const patientId = `P-${timestamp}${randomNum}`;
+      const smartwatchId = `SW-${timestamp}${randomNum}`;
 
       const { error } = await supabase
         .from('patients')
         .insert({
-          patient_id: patientIdData,
+          patient_id: patientId,
           full_name: fullName,
           national_id: nationalId,
           age: parseInt(age),
-          smartwatch_id: smartwatchIdData,
-          admitted_by: profile.id,
+          smartwatch_id: smartwatchId,
         });
 
       if (error) throw error;
 
       toast({
         title: "Patient Added",
-        description: `${fullName} has been successfully added with ID: ${patientIdData}`,
+        description: `${fullName} has been successfully added with ID: ${patientId}`,
       });
 
       // Reset form
