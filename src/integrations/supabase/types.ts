@@ -14,7 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      patients: {
+        Row: {
+          age: number
+          created_at: string
+          full_name: string
+          id: string
+          national_id: string
+          patient_id: string
+          smartwatch_id: string
+          updated_at: string
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          full_name: string
+          id?: string
+          national_id: string
+          patient_id: string
+          smartwatch_id: string
+          updated_at?: string
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          full_name?: string
+          id?: string
+          national_id?: string
+          patient_id?: string
+          smartwatch_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sensor_data: {
+        Row: {
+          body_temperature: number
+          diastolic_bp: number
+          heart_rate: number
+          id: string
+          oxygen_saturation: number
+          patient_id: string
+          respiratory_rate: number
+          systolic_bp: number
+          timestamp: string
+        }
+        Insert: {
+          body_temperature: number
+          diastolic_bp: number
+          heart_rate: number
+          id?: string
+          oxygen_saturation: number
+          patient_id: string
+          respiratory_rate: number
+          systolic_bp: number
+          timestamp?: string
+        }
+        Update: {
+          body_temperature?: number
+          diastolic_bp?: number
+          heart_rate?: number
+          id?: string
+          oxygen_saturation?: number
+          patient_id?: string
+          respiratory_rate?: number
+          systolic_bp?: number
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sensor_data_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      watchlist: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +158,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role: "doctor" | "nurse"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +285,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["doctor", "nurse"],
+    },
   },
 } as const
